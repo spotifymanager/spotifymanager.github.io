@@ -42,3 +42,48 @@ const initiateLogin = async () => {
 };
 
 document.getElementById('login-button').addEventListener('click', initiateLogin);
+const handleCallback = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    
+    if (state !== localStorage.getItem('state')) {
+        console.error('State mismatch. Possible CSRF attack.');
+        return;
+    }
+    
+    const codeVerifier = localStorage.getItem('codeVerifier');
+    
+    // Exchange the authorization code for an access token
+    const tokenUrl = 'https://accounts.spotify.com/api/token';
+    const data = {
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: redirectUri,
+        client_id: clientId,
+        code_verifier: codeVerifier,
+    };
+
+    const response = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(data),
+    });
+
+    const tokenData = await response.json();
+    
+    // Use the access token and refresh token as needed
+    console.log('Access Token:', tokenData.access_token);
+    console.log('Refresh Token:', tokenData.refresh_token);
+    
+    // Clear codeVerifier and state from local storage
+    localStorage.removeItem('codeVerifier');
+    localStorage.removeItem('state');
+};
+
+// Check if the URL contains the code parameter
+if (window.location.search.includes('code')) {
+    handleCallback();
+}
