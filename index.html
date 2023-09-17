@@ -1,69 +1,13 @@
 <!DOCTYPE html>
-<html lang="de">
-  <head>
-    <meta charset="utf-8">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Manager by k1nsej</title>
-      <javascript>
-        //generate code verifier 
-        function generateRandomString(length) {
-          let text = '';
-          let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        
-          for (let i = 0; i < length; i++) {
-            text += possible.charAt(Math.floor(Math.random() * possible.length));
-          }
-          return text;
-        }
-
-        //sha-256 generation
-        const digest = await window.crypto.subtle.digest('SHA-256', data);
-
-        //base64 represantation
-        async function generateCodeChallenge(codeVerifier) {
-          function base64encode(string) {
-            return btoa(String.fromCharCode.apply(null, new Uint8Array(string)))
-              .replace(/\+/g, '-')
-              .replace(/\//g, '_')
-              .replace(/=+$/, '');
-          }
-        
-          const encoder = new TextEncoder();
-          const data = encoder.encode(codeVerifier);
-          const digest = await window.crypto.subtle.digest('SHA-256', data);
-        
-          return base64encode(digest);
-        }
-
-        //user auth
-        const clientId = 'df25918a15b042b79566cba94fc18ca6';
-        const redirectUri = 'https://spotifymanager.github.io';
-        
-        let codeVerifier = generateRandomString(128);
-        
-        generateCodeChallenge(codeVerifier).then(codeChallenge => {
-          let state = generateRandomString(16);
-          let scope = 'user-read-private user-read-email';
-        
-          localStorage.setItem('code_verifier', codeVerifier);
-        
-          let args = new URLSearchParams({
-            response_type: 'code',
-            client_id: clientId,
-            scope: scope,
-            redirect_uri: redirectUri,
-            state: state,
-            code_challenge_method: 'S256',
-            code_challenge: codeChallenge
-          });
-        
-          window.location = 'https://accounts.spotify.com/authorize?' + args;
-        });
-
-      </javascript>
-  </head>
-  <body>
-      <button onclick="generateRandomString(">Hier Klicken</button>
-  </body>
+    <title>Spotify PKCE Authorization</title>
+</head>
+<body>
+    <button id="login-button">Log in with Spotify</button>
+    
+    <script src="app.js"></script>
+</body>
 </html>
-
