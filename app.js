@@ -1,5 +1,5 @@
-const clientId = 'YOUR_CLIENT_ID';
-const redirectUri = 'YOUR_REDIRECT_URI';
+const clientId = 'df25918a15b042b79566cba94fc18ca6';
+const redirectUri = 'spotifymanager.github.io';
 const scopes = ['user-read-private', 'user-read-email']; // Add the required scopes
 
 const generateRandomString = length => {
