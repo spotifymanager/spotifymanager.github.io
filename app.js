@@ -30,6 +30,28 @@ const createCodeChallenge = async (codeVerifier) => {
     return codeChallenge;
 };
 
+const getAccessToken = async (code) => {
+    const tokenUrl = 'https://accounts.spotify.com/api/token';
+    const data = {
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: redirectUri,
+        client_id: clientId,
+        code_verifier: codeVerifier,
+    };
+
+    const response = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(data),
+    });
+
+    const tokenData = await response.json();
+    return tokenData.access_token;
+};
+
 const initiateLogin = async () => {
     const codeVerifier = createCodeVerifier();
     const codeChallenge = await createCodeChallenge(codeVerifier);
@@ -62,6 +84,8 @@ const handleCallback = async () => {
         redirect_uri: redirectUri,
         client_id: clientId,
         code_verifier: codeVerifier,
+    
+    const accessToken = await getAccessToken(code);
     };
 
     const response = await fetch(tokenUrl, {
@@ -87,3 +111,31 @@ const handleCallback = async () => {
 if (window.location.search.includes('code')) {
     handleCallback();
 }
+
+const searchForSongs = async (query) => {
+    const accessToken = await getAccessToken(); // Get the access token
+
+    const response = await fetch(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=5`, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+        }
+    });
+
+    const data = await response.json();
+    return data.tracks.items;
+};
+
+document.getElementById('search-button').addEventListener('click', async () => {
+    const query = document.getElementById('search-input').value;
+    const resultsContainer = document.getElementById('results');
+
+    const tracks = await searchForSongs(query);
+
+    // Display search results
+    resultsContainer.innerHTML = '';
+    tracks.forEach(track => {
+        const trackElement = document.createElement('div');
+        trackElement.innerText = `${track.name} by ${track.artists[0].name}`;
+        resultsContainer.appendChild(trackElement);
+    });
+});
